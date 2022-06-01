@@ -6,7 +6,7 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import { getUserFromToken } from './utils/getUserFromToken';
 const port: number = 4200;
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 export interface Context {
   prisma: PrismaClient<
     Prisma.PrismaClientOptions,
