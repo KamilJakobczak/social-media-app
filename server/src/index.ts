@@ -1,7 +1,9 @@
 import { ApolloServer } from 'apollo-server';
-import { Query, Mutation } from './resolvers'; //as long as you use index.ts inside /resolvers/ you don't need to specify the filename
+import { Query, Mutation, Profile, Post, User } from './resolvers'; //as long as you use index.ts inside /resolvers/ you don't need to specify the filename
+
 import { typeDefs } from './schema';
 import { PrismaClient, Prisma } from '@prisma/client';
+import { getUserFromToken } from './utils/getUserFromToken';
 const port: number = 4200;
 
 const prisma = new PrismaClient();
@@ -11,6 +13,9 @@ export interface Context {
     never,
     Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
   >;
+  userInfo: {
+    userId: number;
+  } | null;
 }
 
 const server = new ApolloServer({
@@ -18,8 +23,14 @@ const server = new ApolloServer({
   resolvers: {
     Query,
     Mutation,
+    Profile,
+    Post,
+    User,
   },
-  context: { prisma },
+  context: async ({ req }: any): Promise<Context> => {
+    const userInfo = await getUserFromToken(req.headers.authorization);
+    return { prisma, userInfo };
+  },
   csrfPrevention: true,
 });
 
